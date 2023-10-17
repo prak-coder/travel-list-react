@@ -1,17 +1,18 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-  { id: 3, description: "charger", quantity: 1, packed: true },
-];
-
 export default function App() {
+  const [items, setItems] = useState([]);
+  function handleAddItems(item) {
+    setItems(() => [...items, item]);
+  }
+  function handleDeleteItems(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <Packinglist />
+      <Form onAddItems={handleAddItems} />
+      <Packinglist onDeleteItem={handleDeleteItems} items={items} />
       <Stats />
     </div>
   );
@@ -20,16 +21,19 @@ export default function App() {
 function Logo() {
   return <h1>🌴 FAR AWAY 💼</h1>;
 }
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
+
   function handleSubmit(e) {
     e.preventDefault();
     //when desctiption is empty no form submit
     if (!description) return;
     const newItem = { description, quantity, packed: false, id: Date.now() };
     //set form to original state
-    console.log(newItem);
+    // console.log(newItem);
+    //items.push() no state is immutable
+    onAddItems(newItem);
     setDescription("");
     setQuantity(1);
   }
@@ -58,26 +62,26 @@ function Form() {
     </form>
   );
 }
-function Packinglist() {
+function Packinglist({ items, onDeleteItem }) {
   return (
     <div>
       <ul className="list">
-        {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+        {items.map((item) => (
+          <Item onDeleteItem={onDeleteItem} item={item} key={item.id} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem }) {
   return (
     <li>
       {/* <input type="checkbox" /> */}
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
   );
 }
